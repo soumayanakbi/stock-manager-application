@@ -1,0 +1,481 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+typedef struct DATE {
+    int JOUR;
+    int MOIS;
+    int ANNEE;
+} date;
+typedef struct PRODUIT{
+    int ID;
+    char NOM[20];
+    float PRIX;
+    char DESC[30];
+    date DE,DS;
+} produit ;
+
+void Ajouter(){
+    produit p;
+    FILE *f=fopen("stock.txt","a");
+    if (f == NULL) {
+        exit(0);
+    }
+    printf("\n\t\tAjout d\'un nouveau produit \n\n");
+
+    do{
+            printf("Donnez l\'identifiant du produit a ajouter(6 chiffres): ");
+            fflush(stdin);
+            scanf("%d", &p.ID);
+    }while(p.ID<100000 || p.ID>999999);
+
+
+    do{
+            printf("Donnez le nom du produit a ajouter : ");
+            fflush(stdin);
+            gets(p.NOM);
+    }while(chaine_sans_espace(p.NOM)==0);
+
+    do {
+            printf("Donnez le prix du produit a ajouter : ");
+            fflush(stdin);
+            scanf("%f", &p.PRIX);
+    }while(p.PRIX<0);
+
+
+    do {
+        printf("Donnez la description du produit a ajouter : ");
+        fflush(stdin);
+        gets(p.DESC);
+    }while(sans_epace(p.DESC)==0);
+
+    do {
+            printf("Donnez date d\'entree du produit a ajouter (JJ MM AAAA) :");
+            scanf("%d%d%d",&p.DE.JOUR,&p.DE.MOIS,&p.DE.ANNEE);
+    }while((p.DE.JOUR<0 || p.DE.JOUR>31 || p.DE.MOIS <0 || p.DE.MOIS>12 || p.DE.ANNEE<1000 || p.DE.ANNEE>9999 ) ||((p.DE.MOIS==2)&& p.DE.JOUR>28));
+
+
+    do{
+            printf("Donnez date de sortie du produit a ajouter (JJ MM AAAA) : ");
+            scanf("%d%d%d",&p.DS.JOUR,&p.DS.MOIS,&p.DS.ANNEE);
+
+    }while((p.DS.JOUR<0 || p.DS.JOUR>31 || p.DS.MOIS <0 || p.DS.MOIS>12 || p.DS.ANNEE<1000 || p.DS.ANNEE>9999)||((p.DS.MOIS==2)&& p.DS.JOUR>28));
+
+
+    printf("L\' operation d\'ajout effectuee avec succes !\n");
+
+
+    fprintf(f,"%d %s %f %s %d/%d/%d %d/%d/%d\n",p.ID,p.NOM,p.PRIX,p.DESC,p.DE.JOUR,p.DE.MOIS,p.DE.ANNEE,p.DS.JOUR,p.DS.MOIS,p.DS.ANNEE);
+
+
+
+    fclose(f);
+    GestionProduit();
+    return 0;
+}
+void Supprimer(){
+    int x;
+    FILE *f;
+    FILE *nf;
+  	f=fopen("stock.txt","a+");
+  	nf=fopen("tmpfile.txt","w");
+    if (f == NULL) {
+        exit(0);
+    }
+    if (nf == NULL) {
+        exit(0);
+    }
+
+  	do{
+            printf("Donner l'identifiant de produit a supprimer (6 chiffres) :");
+            scanf("%d",&x);
+    }while(x<100000 || x>999999);
+
+
+
+  	produit p;
+  	while (fscanf(f,"%d %s %f %s %d/%d/%d %d/%d/%d\n",&p.ID,p.NOM,&p.PRIX,&p.DESC,&p.DE.JOUR,&p.DE.MOIS,&p.DE.ANNEE,&p.DS.JOUR,&p.DS.MOIS,&p.DS.ANNEE)!=EOF){
+     if(p.ID!=x){
+       fprintf(nf,"%d %s %f %s %d/%d/%d %d/%d/%d\n",p.ID,p.NOM,p.PRIX,p.DESC,p.DE.JOUR,p.DE.MOIS,p.DE.ANNEE,p.DS.JOUR,p.DS.MOIS,p.DS.ANNEE);
+	 }
+}
+	fclose(nf);
+	fclose(f);
+	f=fopen("stock.txt","w");
+	nf=fopen("tmpfile.txt","r");
+	while (fscanf(nf,"%d %s %f %s %d/%d/%d %d/%d/%d\n",&p.ID,p.NOM,&p.PRIX,&p.DESC,&p.DE.JOUR,&p.DE.MOIS,&p.DE.ANNEE,&p.DS.JOUR,&p.DS.MOIS,&p.DS.ANNEE)!=EOF){
+
+
+       fprintf(f,"%d %s %f %s %d/%d/%d %d/%d/%d\n",p.ID,p.NOM,p.PRIX,p.DESC,p.DE.JOUR,p.DE.MOIS,p.DE.ANNEE,p.DS.JOUR,p.DS.MOIS,p.DS.ANNEE);
+
+	}
+	fclose(nf);
+	fclose(f);
+	printf("L\' operation de suppression effectuee avec succes !\n");
+
+	GestionProduit();
+
+}
+
+
+void AfficherDesc(){
+    int x;
+    produit prod;
+    do {
+            printf("Donner l'identifiant de produit (6 chiffres):");
+            scanf("%d",&x);
+    }while(x<100000 || x>999999);
+
+    FILE *f=fopen("stock.txt","r");
+    if (f == NULL) {
+        exit(0);
+    }
+    while (fscanf(f,"%d %s %f %s %d/%d/%d %d/%d/%d\n",&prod.ID,prod.NOM,&prod.PRIX,&prod.DESC,&prod.DE.JOUR,&prod.DE.MOIS,&prod.DE.ANNEE,&prod.DS.JOUR,&prod.DS.MOIS,&prod.DS.ANNEE)!=EOF){
+        if(prod.ID==x){
+            printf("\nla description de produit d\'identifiant %d est : %s\n",x,prod.DESC);
+         }
+    }
+    fclose(f);
+    GestionProduit();
+    return 0;
+
+}
+
+
+
+
+
+void AfficherStock(){
+    char line[256];
+
+    printf("les produits actuellement en stock sont :\n");
+
+
+    FILE *f=fopen("stock.txt","r");
+    if (f == NULL) {
+    printf("Erreur lors de l'ouverture du fichier");
+    exit(1) ;
+    }
+    while (fgets(line, sizeof(line), f) != NULL) {
+    printf("%s", line);
+    }
+    fclose(f);
+  return 0;
+}
+
+
+
+
+
+
+
+
+
+
+void modifierProduit( ){
+    int choix,x;
+  	do{
+            printf("Donner l'identifiant de produit a modifier (6 chiffres) :");
+            scanf("%d",&x);
+    }while(x<100000 || x>999999);
+    FILE *f=fopen("stock.txt","r");
+    FILE *nf=fopen("tmpfile.txt","w+");
+    if (f == NULL) {
+        exit(0);
+    }
+    if (nf == NULL) {
+        exit(0);
+    }
+    produit prod;
+
+	while (fscanf(f,"%d %s %f %s %d/%d/%d %d/%d/%d\n",&prod.ID,prod.NOM,&prod.PRIX,&prod.DESC,&prod.DE.JOUR,&prod.DE.MOIS,&prod.DE.ANNEE,&prod.DS.JOUR,&prod.DS.MOIS,&prod.DS.ANNEE)!=EOF){
+
+
+	 if(prod.ID==x){
+        printf("Produit avant modification :\n");
+      	printf("(1) nom :%s\n",prod.NOM);
+        printf("(2) prix :%f\n",prod.PRIX);
+      	printf("(3) description :%s\n",prod.DESC);
+      	printf("(4) date entree :%d/%d/%d\n",prod.DE.JOUR,prod.DE.MOIS,prod.DE.ANNEE);
+      	printf("(5) date sortie :%d/%d/%d\n",prod.DS.JOUR,prod.DS.MOIS,prod.DS.ANNEE);
+
+       do{
+		printf("Merci de choisir le choix de modification: ");
+		scanf("%d",&choix);
+		printf("\n");
+	}while(choix<0 || choix >6);
+
+
+
+	switch(choix){
+			case 1:
+	           	  printf("Saisir le nouveau nom :");
+				  fflush(stdin);
+                  gets(prod.NOM);
+				break;
+			case 2:
+
+				  printf("Saisir le nouveau prix :");
+				  fflush(stdin);
+                 scanf("%f",&prod.PRIX);
+				break;
+			case 3:
+
+			  printf("Saisir la nouvelle description :");
+	          fflush(stdin);
+              gets(prod.DESC);
+				break;
+			case 4:
+				  printf("Saisir la nouvelle date d'entrée :");
+		          fflush(stdin);
+                 scanf("%d",&prod.DE.JOUR);
+                  scanf("%d",&prod.DE.MOIS);
+                 scanf("%d",&prod.DE.ANNEE);
+				break;
+			case 5:
+				  printf("Saisir la nouvelle date de sortie :");
+		          fflush(stdin);
+                 scanf("%d",&prod.DS.JOUR);
+                 scanf("%d",&prod.DS.MOIS);
+                 scanf("%d",&prod.DS.ANNEE);
+				break;
+			case 0:
+				exit(1);
+		}
+	}
+
+
+	 
+	 	fprintf(nf,"%d %s %f %s %d/%d/%d %d/%d/%d\n",prod.ID,prod.NOM, prod.PRIX,prod.DESC,prod.DE.JOUR,prod.DE.MOIS,prod.DE.ANNEE,prod.DS.JOUR,prod.DS.MOIS,prod.DS.ANNEE);
+}
+
+	fclose(nf);
+	fclose(f);
+    f=fopen("stock.txt","w+");
+	nf=fopen("tmpfile.txt","r");
+	if(f==NULL || nf ==NULL)
+		exit(1);
+	while (fscanf(nf,"%d %s %f %s %d/%d/%d %d/%d/%d\n",&prod.ID,prod.NOM,&prod.PRIX,prod.DESC,&prod.DE.JOUR,&prod.DE.MOIS,&prod.DE.ANNEE, &prod.DS.JOUR,&prod.DS.MOIS,&prod.DS.ANNEE)!=EOF){
+
+       fprintf(f,"%d %s %f %s %d/%d/%d %d/%d/%d\n",prod.ID,prod.NOM,prod.PRIX,prod.DESC,prod.DE.JOUR,prod.DE.MOIS,prod.DE.ANNEE,prod.DS.JOUR,prod.DS.MOIS,prod.DS.ANNEE);
+
+	}
+	fclose(nf);
+	fclose(f);
+    printf("L\' operation de modification effectuee avec succes !\n");
+
+	GestionProduit();
+}
+
+
+
+
+void Recherche(){
+    int x;
+  	do{
+            printf("Donner l'identifiant de produit a supprimer (6 chiffres) :");
+            scanf("%d",&x);
+    }while(x<100000 || x>999999);
+    FILE *f=fopen("stock.txt","r");
+    if (f == NULL) {
+        exit(0);
+    }
+    produit prod;
+    while (fscanf(f,"%d %s %f %s %d/%d/%d %d/%d/%d\n",&prod.ID,prod.NOM,&prod.PRIX,&prod.DESC,&prod.DE.JOUR,&prod.DE.MOIS,&prod.DE.ANNEE,&prod.DS.JOUR,&prod.DS.MOIS,&prod.DS.ANNEE)!=EOF){
+            if(prod.ID==x){
+                printf("Id= %d\nNOM= %s\nPRIX= %f\nDESCRIPTION= %s\nDATE DE ENTREE= %d/%d/%d\nDATE DE SORTIE= %d/%d/%d\n ",prod.ID,prod.NOM,prod.PRIX,prod.DESC,prod.DE.JOUR,prod.DE.MOIS,prod.DE.ANNEE,prod.DS.JOUR,prod.DS.MOIS,prod.DS.ANNEE);
+	   	   }
+    }
+	fclose(f);
+}
+
+
+
+
+
+void hestoriqueEntree(){
+    int jour, mois;
+    produit prod;
+    FILE *f=fopen("stock.txt","r");
+    if (f == NULL) {
+        exit(0);
+    }
+    printf("Donner le jour d\'entree : ");
+    scanf("%d", &jour);
+    while (fscanf(f,"%d %s %f %s %d/%d/%d %d/%d/%d\n",&prod.ID,prod.NOM,&prod.PRIX,&prod.DESC,&prod.DE.JOUR,&prod.DE.MOIS,&prod.DE.ANNEE,&prod.DS.JOUR,&prod.DS.MOIS,&prod.DS.ANNEE)!=EOF){
+        if(prod.DE.JOUR==jour){
+            printf("c'est le jour l\'entree du produit %s\n",prod.NOM);
+
+        }
+    }
+    fclose(f);
+    f=fopen("stock.txt","r");
+    printf("Donner le mois d\'entree  ");
+    scanf("%d", &mois);
+    while (fscanf(f,"%d %s %f %s %d/%d/%d %d/%d/%d\n",&prod.ID,prod.NOM,&prod.PRIX,&prod.DESC,&prod.DE.JOUR,&prod.DE.MOIS,&prod.DE.ANNEE,&prod.DS.JOUR,&prod.DS.MOIS,&prod.DS.ANNEE)!=EOF){
+        if(prod.DE.MOIS==mois){
+            printf("c'est le mois d\'entree du produit %s\n",prod.NOM);
+
+        }
+    }
+    	fclose(f);
+
+}
+
+void hestoriqueSortie(){
+    int jour, mois;
+    produit prod;
+    FILE *f=fopen("stock.txt","r");
+    if (f == NULL) {
+        exit(0);
+    }
+    do {
+            printf("Donner le jour d\'sortie : ");
+            scanf("%d", &jour);
+    }while(jour<0 || jour>31);
+
+
+    while (fscanf(f,"%d %s %f %s %d/%d/%d %d/%d/%d\n",&prod.ID,prod.NOM,&prod.PRIX,&prod.DESC,&prod.DE.JOUR,&prod.DE.MOIS,&prod.DE.ANNEE,&prod.DS.JOUR,&prod.DS.MOIS,&prod.DS.ANNEE)!=EOF){
+        if(prod.DS.JOUR==jour){
+            printf("c'est le jour de sortie du produit %s\n",prod.NOM);
+
+        }
+    }
+    fclose(f);
+    f=fopen("stock.txt","r");
+    do {
+            printf("donner le mois de sortie  ");
+            scanf("%d", &mois);
+        }while(mois <0 || mois>12 );
+
+
+    while (fscanf(f,"%d %s %f %s %d/%d/%d %d/%d/%d\n",&prod.ID,prod.NOM,&prod.PRIX,&prod.DESC,&prod.DE.JOUR,&prod.DE.MOIS,&prod.DE.ANNEE,&prod.DS.JOUR,&prod.DS.MOIS,&prod.DS.ANNEE)!=EOF){
+        if(prod.DS.MOIS==mois){
+            printf("c'est le mois de sortie du produit %s\n",prod.NOM);
+
+        }
+    }
+    	fclose(f);
+
+}
+
+
+void application(){
+		printf("\t\t\t\t __________________________________________________\n");
+		printf("\t\t\t\t|        -------- Bienvenue --------               | \n");
+		printf("\t\t\t\t| 1  : Gestion du produit.                         | \n");
+		printf("\t\t\t\t| 2  : Afficher le stock .                         | \n");
+		printf("\t\t\t\t| 3  : Afficher l'historique d'entree du produit.  | \n");
+		printf("\t\t\t\t| 4  : Afficher l'historique de sortie du produit. | \n");
+		printf("\t\t\t\t| 0  : Quitter .                                   | \n");
+		printf("\t\t\t\t|__________________________________________________| \n");
+		printf("\n");
+        int c;
+		do {
+                printf("Merci de choisir votre commande : ");
+                scanf("%d",&c);
+        }while(c<0 || c>4);
+        commande(c);
+
+}
+
+
+
+
+void commande(int x){
+
+	switch(x){
+			case 1:
+				GestionProduit();
+				break;
+			case 2:
+				AfficherStock();
+				break;
+			case 3:
+			    hestoriqueEntree();
+				break;
+			case 4:
+			    hestoriqueSortie();
+				break;
+			case 0:
+			    exit(1);
+            default :
+                printf("erreur");
+                return 0;
+		}
+	}
+	void GestionProduit(){
+	    int x;
+		printf("\t\t\t\t ___________________________________________  \n");
+		printf("\t\t\t\t|        -------- Bienvenue --------            | \n");
+		printf("\t\t\t\t| 1  : Ajouter un produit.                      | \n");
+		printf("\t\t\t\t| 2  : Afficher la description d\'un produit.    | \n");
+		printf("\t\t\t\t| 3  : Supprimer un produit.                    | \n");
+		printf("\t\t\t\t| 4  : Modifier un produit.                     | \n");
+		printf("\t\t\t\t| 5  : Recherche d\'un produit dans le stock.    | \n");
+		printf("\t\t\t\t| 0  : Retour .                                 | \n");
+		printf("\t\t\t\t|_______________________________________________| \n");
+		printf("\n");
+	    do{
+		printf("Merci de choisir votre choix : ");
+		scanf("%d",&x);
+		}while(x<0 || x>5);
+        choix(x);
+		return 0;
+	}
+
+
+
+void choix(int x ){
+	switch(x){
+			case 1:
+				Ajouter();
+				break;
+			case 2:
+				AfficherDesc();
+				break;
+			case 3:
+				Supprimer();
+				break;
+			case 4:
+				modifierProduit();
+				break;
+			case 5:
+				Recherche();
+				break;
+			case 0:
+				application();
+            default :
+                printf("erreur");
+                return 0;
+		}
+		return 0;
+}
+int sans_epace(char ch[30]){
+    int i;
+    int l=strlen(ch);
+    for (i=0 ;i<l ;i++){
+        if (ch[i]==' '){
+            return 0;
+        }
+    }
+    return 1;
+}
+int  chaine_sans_espace(char ch[20]){
+    if (strpbrk(ch, "0123456789")){
+            return 0;
+    }
+    else{
+        return 1;
+    }
+    return 0;
+}
+
+
+
+
+
+int main(int argc, char *argv[]) {
+    application();
+    return 0;
+
+}
